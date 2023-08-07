@@ -1,12 +1,14 @@
 package dao
 
 import (
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"time"
+
+	"github.com/abuziming/dousheng_demo/config"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var Db *gorm.DB
@@ -21,13 +23,18 @@ func Init() {
 			Colorful:      true,         // 彩色打印
 		},
 	)
-	var err error
-	dsn := "douyin:zjqxy@tcp(43.138.25.60:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
-	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+
+	// 连接数据库
+	Db, err := gorm.Open(mysql.Open(config.DBconnect()), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
-		log.Panicln("err:", err.Error())
+		log.Panicln(err)
 	}
 
+	// 迁移对象到数据表上
+	err = Db.AutoMigrate(&User{}, &Video{}, &Comment{}, &UserLogin{})
+	if err != nil {
+		log.Panicln(err)
+	}
 }

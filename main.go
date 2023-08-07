@@ -1,16 +1,20 @@
 package main
 
 import (
-	"github.com/RaymondCode/simple-demo/service"
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"log"
+
+	"github.com/abuziming/dousheng_demo/config"
+	"github.com/abuziming/dousheng_demo/service"
 )
 
 func main() {
 	go service.RunMessageServer()
 
-	r := gin.Default()
+	r := initRouter()
 
-	initRouter(r)
-
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	err := r.Run(fmt.Sprintf(":%d", config.Global.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	if err != nil {
+		log.Panicln(err)
+	}
 }
