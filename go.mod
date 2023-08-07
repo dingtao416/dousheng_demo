@@ -1,4 +1,4 @@
-module github.com/RaymondCode/simple-demo
+module github.com/abuziming/dousheng_demo
 
 go 1.17
 
@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/BurntSushi/toml v1.3.2
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

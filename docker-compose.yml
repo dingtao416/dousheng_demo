@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  mysql-dev:
+    image: mysql:8.1 # 镜像名
+    container_name: mysql8.1
+    command: --default-authentication-plugin=mysql_native_password # 默认的身份验证插件为mysql_native_password，即用密码登录
+    restart: always # 当容器运行出现故障时，自动恢复重启
+    environment:
+      MYSQL_ROOT_PASSWORD: 123 # mysql数据库，root账号的密码，如果已设置则不改变，否则设为 123
+      TZ: Asia/Shanghai # 数据库容器的时区为亚洲上海
+      MYSQL_DATABASE: tiktok # 设置初始数据库为 tiktok
+    ports:
+      - 3306:3306
+    # volumes:
+    #   - ./data:/var/lib/mysql # 定义容器中的目录或文件与主机上的目录或文件之间的关联关系，用于持久化存储
