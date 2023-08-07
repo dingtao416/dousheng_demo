@@ -3,7 +3,6 @@ module github.com/abuziming/dousheng_demo
 go 1.17
 
 require (
-	github.com/RaymondCode/simple-demo v0.0.0-20230221080337-89b8c9434e04
 	github.com/gavv/httpexpect/v2 v2.8.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/importcjj/sensitive v0.0.0-20200106142752-42d1c505be7b
