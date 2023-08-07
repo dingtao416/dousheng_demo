@@ -20,7 +20,7 @@ type UserLogin struct {
 token 存在内存中，由服务器动态分发
 */
 type User struct {
-	Id            int64      `json:"user_id"`
+	Id            int64      `json:"id"`
 	Name          string     `json:"name"`
 	FollowCount   int64      `json:"follow_count"`                          // 社交部分保留字段，用户关注总数，现默认返回 0
 	FollowerCount int64      `json:"follower_count"`                        // 社交部分保留字段，用户粉丝总数，现默认返回 0
