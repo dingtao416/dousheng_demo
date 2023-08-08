@@ -1,14 +1,21 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"errors"
 	"net/http"
-	"sync/atomic"
+
+	"github.com/abuziming/dousheng_demo/dao"
+	"github.com/gin-gonic/gin"
+)
+
+const (
+	maxLength = 32
 )
 
 // usersLoginInfo use map to store user info, and key is username+password for demo
 // user data will be cleared every time the server starts
 // test data: username=zhanglei, password=douyin
+// 这里不能删，message 的 demo 保留全局变量
 var usersLoginInfo = map[string]User{
 	"zhangleidouyin": {
 		Id:            1,
@@ -19,74 +26,146 @@ var usersLoginInfo = map[string]User{
 	},
 }
 
-var userIdSequence = int64(1)
-
-type UserLoginResponse struct {
-	Response
+type loginResponse struct {
 	UserId int64  `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
-type UserResponse struct {
+type userLoginResponse struct {
 	Response
-	User User `json:"user"`
+	*loginResponse
 }
 
-func Register(c *gin.Context) {
+type queryLoginProxy struct {
+	username string
+	password string
+	data     loginResponse
+}
+
+type userResponse struct {
+	Response
+	User dao.User `json:"user"`
+}
+
+func RegisterHandler(c *gin.Context) {
+	userHandler(c, register)
+}
+
+func LoginHandler(c *gin.Context) {
+	userHandler(c, login)
+}
+
+func UserInfoHandler(c *gin.Context) {
+	// user_id 为 jwt 上层解析的
+	rawId, _ := c.Get("user_id")
+	user := &dao.User{Id: rawId.(int64)}
+	if err := dao.QueryUserInfo(user); err != nil {
+		c.JSON(http.StatusOK, userLoginResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			},
+		})
+	}
+	c.JSON(http.StatusOK, userResponse{
+		Response: Response{StatusCode: 0},
+		User:     *user,
+	})
+}
+
+func userHandler(c *gin.Context, f func(string, string) (*loginResponse, error)) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	token := username + password
+	response, err := f(username, password)
 
-	if _, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
-		})
-	} else {
-		atomic.AddInt64(&userIdSequence, 1)
-		newUser := User{
-			Id:   userIdSequence,
-			Name: username,
-		}
-		usersLoginInfo[token] = newUser
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
-			UserId:   userIdSequence,
-			Token:    username + password,
+	if err != nil {
+		c.JSON(http.StatusOK, userLoginResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			},
 		})
 	}
+
+	c.JSON(http.StatusOK, userLoginResponse{
+		Response:      Response{StatusCode: 0},
+		loginResponse: response,
+	})
 }
 
-func Login(c *gin.Context) {
-	username := c.Query("username")
-	password := c.Query("password")
-
-	token := username + password
-
-	if user, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
-			UserId:   user.Id,
-			Token:    token,
-		})
-	} else {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
-		})
+func register(username, password string) (*loginResponse, error) {
+	q := &queryLoginProxy{username: username, password: password}
+	// 检验参数
+	if err := q.check(); err != nil {
+		return nil, err
 	}
+	// 插入数据到数据库，设置 userid，并发放 token
+	if err := q.insert(); err != nil {
+		return nil, err
+	}
+	return &q.data, nil
 }
 
-func UserInfo(c *gin.Context) {
-	token := c.Query("token")
-
-	if user, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 0},
-			User:     user,
-		})
-	} else {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
-		})
+func login(username, password string) (*loginResponse, error) {
+	q := &queryLoginProxy{username: username, password: password}
+	// 检验参数
+	if err := q.check(); err != nil {
+		return nil, err
 	}
+	// 查询当前用户数据，设置 userid，发放 token
+	if err := q.queryLogin(); err != nil {
+		return nil, err
+	}
+	return &q.data, nil
+}
+
+func (q *queryLoginProxy) check() error {
+	if len(q.username) > maxLength {
+		return errors.New("用户名长度超过限制")
+	}
+	if len(q.password) > maxLength {
+		return errors.New("密码长度超过限制")
+	}
+	return nil
+}
+
+func (q *queryLoginProxy) insert() error {
+	if err := dao.IsUserExist(q.username); err != nil {
+		return err
+	}
+
+	userLogin := &dao.UserLogin{Username: q.username, Password: q.password}
+	user := &dao.User{User: userLogin, Name: q.username}
+	// 插入时，自动依据主键获得 id
+	if err := dao.AddUser(user); err != nil {
+		return err
+	}
+
+	token, err := GetToken(userLogin)
+	if err != nil {
+		return err
+	}
+
+	q.data.Token = token
+	q.data.UserId = user.Id
+
+	return nil
+}
+
+func (q *queryLoginProxy) queryLogin() error {
+	userLogin := &dao.UserLogin{Username: q.username, Password: q.password}
+	// 查询时获得 userid
+	if err := dao.QueryUserLogin(userLogin); err != nil {
+		return err
+	}
+
+	token, err := GetToken(userLogin)
+	if err != nil {
+		return err
+	}
+
+	q.data.Token = token
+	q.data.UserId = userLogin.UserId
+	return nil
 }

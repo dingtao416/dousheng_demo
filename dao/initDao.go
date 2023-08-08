@@ -1,19 +1,20 @@
 package dao
 
 import (
+	"log"
+	"os"
+	"time"
+
 	"github.com/abuziming/dousheng_demo/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"os"
-	"time"
 )
 
 var Db *gorm.DB
 
 // 连接数据库
-func Init() {
+func init() {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
@@ -23,8 +24,9 @@ func Init() {
 		},
 	)
 
+	var err error
 	// 连接数据库
-	Db, err := gorm.Open(mysql.Open(config.DBconnect()), &gorm.Config{
+	Db, err = gorm.Open(mysql.Open(config.DBconnect()), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {

@@ -29,10 +29,15 @@ type Path struct {
 	StaticSourcePath string
 }
 
+type Secret struct {
+	JwtKey string
+}
+
 type Config struct {
 	Mysql  Mysql
 	Server Server
 	Path   Path
+	Secret Secret
 }
 
 var Global Config
