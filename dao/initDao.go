@@ -24,8 +24,9 @@ func init() {
 		},
 	)
 
+	var err error
 	// 连接数据库
-	Db, err := gorm.Open(mysql.Open(config.DBconnect()), &gorm.Config{
+	Db, err = gorm.Open(mysql.Open(config.DBconnect()), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
