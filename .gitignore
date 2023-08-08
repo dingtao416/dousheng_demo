@@ -21,3 +21,6 @@
 go.work
 
 .idea
+
+# linux 下可执行文件名
+dousheng_demo
