@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/abuziming/dousheng_demo/config"
+	_ "github.com/abuziming/dousheng_demo/dao"
 	"github.com/abuziming/dousheng_demo/service"
 )
 

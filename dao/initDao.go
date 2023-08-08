@@ -14,7 +14,7 @@ import (
 var Db *gorm.DB
 
 // 连接数据库
-func Init() {
+func init() {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
