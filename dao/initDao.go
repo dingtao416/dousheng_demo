@@ -1,14 +1,13 @@
 package dao
 
 import (
-	"log"
-	"os"
-	"time"
-
 	"github.com/abuziming/dousheng_demo/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"log"
+	"os"
+	"time"
 )
 
 var Db *gorm.DB

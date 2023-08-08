@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/abuziming/dousheng_demo/config"
+	"github.com/abuziming/dousheng_demo/dao"
 	"github.com/abuziming/dousheng_demo/service"
 )
 
@@ -12,7 +13,7 @@ func main() {
 	go service.RunMessageServer()
 
 	r := initRouter()
-
+	dao.Init()
 	err := r.Run(fmt.Sprintf(":%d", config.Global.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	if err != nil {
 		log.Panicln(err)
