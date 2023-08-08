@@ -14,18 +14,18 @@ func initRouter() *gin.Engine {
 	apiRouter := r.Group("/douyin")
 
 	// basic apis
-	apiRouter.GET("/feed/", controller.Feed)
-	apiRouter.GET("/user/", controller.UserInfo)
-	apiRouter.POST("/user/register/", controller.Register)
-	apiRouter.POST("/user/login/", controller.Login)
-	apiRouter.POST("/publish/action/", controller.Publish)
-	apiRouter.GET("/publish/list/", controller.PublishList)
+	apiRouter.GET("/feed/", controller.Feed)                                      // 这个 token 得特殊处理
+	apiRouter.GET("/user/", controller.JwtAuth(), controller.UserInfoHandler)     // 获取用户信息
+	apiRouter.POST("/user/register/", controller.RegisterHandler)                 // 登录
+	apiRouter.POST("/user/login/", controller.LoginHandler)                       // 注册
+	apiRouter.POST("/publish/action/", controller.JwtAuth(), controller.Publish)  // 发布视频
+	apiRouter.GET("/publish/list/", controller.JwtAuth(), controller.PublishList) // 发布列表
 
 	// extra apis - I
-	apiRouter.POST("/favorite/action/", controller.FavoriteAction)
-	apiRouter.GET("/favorite/list/", controller.FavoriteList)
-	apiRouter.POST("/comment/action/", controller.CommentAction)
-	apiRouter.GET("/comment/list/", controller.CommentList)
+	apiRouter.POST("/favorite/action/", controller.JwtAuth(), controller.FavoriteAction) // 点赞
+	apiRouter.GET("/favorite/list/", controller.JwtAuth(), controller.FavoriteList)      // 喜欢列表
+	apiRouter.POST("/comment/action/", controller.JwtAuth(), controller.CommentAction)   // 评论
+	apiRouter.GET("/comment/list/", controller.JwtAuth(), controller.CommentList)        // 评论列表
 
 	// extra apis - II
 	apiRouter.POST("/relation/action/", controller.RelationAction)
