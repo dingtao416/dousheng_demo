@@ -96,11 +96,11 @@ func userHandler(c *gin.Context, f func(string, string) (*loginResponse, error))
 
 func register(username, password string) (*loginResponse, error) {
 	q := &queryLoginProxy{username: username, password: password}
-	// 检验参数
+
 	if err := q.check(); err != nil {
 		return nil, err
 	}
-	// 插入数据到数据库，设置 userid，并发放 token
+
 	if err := q.insert(); err != nil {
 		return nil, err
 	}
@@ -109,17 +109,18 @@ func register(username, password string) (*loginResponse, error) {
 
 func login(username, password string) (*loginResponse, error) {
 	q := &queryLoginProxy{username: username, password: password}
-	// 检验参数
+
 	if err := q.check(); err != nil {
 		return nil, err
 	}
-	// 查询当前用户数据，设置 userid，发放 token
+
 	if err := q.queryLogin(); err != nil {
 		return nil, err
 	}
 	return &q.data, nil
 }
 
+// 检验参数
 func (q *queryLoginProxy) check() error {
 	if len(q.username) > maxLength {
 		return errors.New("用户名长度超过限制")
@@ -130,6 +131,7 @@ func (q *queryLoginProxy) check() error {
 	return nil
 }
 
+// 插入数据到数据库，设置 userid，并发放 token
 func (q *queryLoginProxy) insert() error {
 	if err := dao.IsUserExist(q.username); err != nil {
 		return err
@@ -153,6 +155,7 @@ func (q *queryLoginProxy) insert() error {
 	return nil
 }
 
+// 查询当前用户数据，设置 userid，发放 token
 func (q *queryLoginProxy) queryLogin() error {
 	userLogin := &dao.UserLogin{Username: q.username, Password: q.password}
 	// 查询时获得 userid

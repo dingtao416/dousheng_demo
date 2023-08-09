@@ -4,9 +4,10 @@ import (
 	"errors"
 )
 
+// 用户名存在返回 error
 func IsUserExist(username string) error {
 	var userlogin UserLogin
-	// 能查询到数据，说明当前用户名存在，err 也不等于 nil
+	// 能查询到数据，说明当前用户名存在，err 等于 nil
 	if err := Db.Where("username=?", username).First(&userlogin).Error; err == nil {
 		return errors.New("用户名已存在")
 	}
@@ -30,6 +31,7 @@ func QueryUserLogin(login *UserLogin) error {
 	return nil
 }
 
+// 根据 userid 查询 user 信息
 func QueryUserInfo(user *User) error {
 	if err := Db.Where(user).First(user).Error; err != nil {
 		return errors.New("用户不存在")
