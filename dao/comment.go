@@ -79,3 +79,10 @@ func GetVideoComments(ctx context.Context, vid string) ([]*Comment, error) {
 	}
 	return comments, nil
 }
+func GetUserIDByVideoID(videoID int64) (int64, error) {
+	var video Video
+	if err := Db.Select("user_id").First(&video, videoID).Error; err != nil {
+		return 0, err
+	}
+	return video.UserId, nil
+}
