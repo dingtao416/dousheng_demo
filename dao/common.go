@@ -1,9 +1,8 @@
 package dao
 
 import (
-	"time"
-
 	"gorm.io/gorm"
+	"time"
 )
 
 /*
@@ -14,6 +13,19 @@ type UserLogin struct {
 	Username string `gorm:"primaryKey"` // 登录信息以用户名为主键，用来查用户名是否重复
 	Password string
 	UserId   int64
+}
+type UserComment struct {
+	Avatar          string `json:"avatar"`           // 用户头像
+	BackgroundImage string `json:"background_image"` // 用户个人页顶部大图
+	FavoriteCount   int64  `json:"favorite_count"`   // 喜欢数
+	FollowCount     int64  `json:"follow_count"`     // 关注总数
+	FollowerCount   int64  `json:"follower_count"`   // 粉丝总数
+	Id              int64  `json:"id"`               // 用户id
+	IsFollow        bool   `json:"is_follow"`        // true-已关注，false-未关注
+	Name            string `json:"name"`             // 用户名称
+	Signature       string `json:"signature"`        // 个人简介
+	TotalFavorited  string `json:"total_favorited"`  // 获赞数量
+	WorkCount       int64  `json:"work_count"`       // 作品数
 }
 
 /*
@@ -51,7 +63,7 @@ type Comment struct {
 	Id         int64          `json:"id"`
 	UserId     int64          `json:"-"`
 	VideoId    int64          `json:"-"`                    // 视频与评论的一对多
-	User       User           `json:"user" gorm:"-"`        // 用户与评论的一对多
+	User       UserComment    `json:"user" gorm:"-"`        // 用户与评论的一对多
 	Content    string         `json:"content"`              // 评论内容
 	CreatedAt  time.Time      `json:"-"`                    // 创建的时间，以这种格式存储方便转为 json 的字符串格式
 	CreateDate string         `json:"create_date" gorm:"-"` // json 传回去的字符串时间形式，数据库无需存储
