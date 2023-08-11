@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"errors"
 )
 
@@ -37,4 +38,12 @@ func QueryUserInfo(user *User) error {
 		return errors.New("用户不存在")
 	}
 	return nil
+}
+
+func GetUserByID(ctx context.Context, userID int64) (*User, error) {
+	res := new(User)
+	if err := Db.WithContext(ctx).First(&res, userID).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
 }

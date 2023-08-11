@@ -29,10 +29,10 @@ func init() {
 	Db, err = gorm.Open(mysql.Open(config.DBconnect()), &gorm.Config{
 		Logger: newLogger,
 	})
+	Db = Db.Debug()
 	if err != nil {
 		log.Panicln(err)
 	}
-
 	// 迁移对象到数据表上
 	err = Db.AutoMigrate(&User{}, &Video{}, &Comment{}, &UserLogin{})
 	if err != nil {
